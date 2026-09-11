@@ -1,16 +1,18 @@
-name: Deploy Native Caddy Site
+name: Deploy to OCI
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'Caddyfile'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup SSH Key
@@ -18,16 +20,19 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.OCI_SSH_KEY }}
 
-      - name: Add Host Key to Known Hosts
+      - name: Add OCI Host to Known Hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.OCI_HOST }} >> ~/.ssh/known_hosts
 
       - name: Sync Web Content to OCI
         run: |
+          # 1. Sync static site files from ./src/ to target web root
           rsync -avz --delete ./src/ ${{ secrets.OCI_USERNAME }}@${{ secrets.OCI_HOST }}:/var/www/oci_web_server/
 
-      - name: Sync Caddyfile & Reload Caddy Service
+          # 2. Copy production Caddyfile to target
+          rsync -avz ./Caddyfile ${{ secrets.OCI_USERNAME }}@${{ secrets.OCI_HOST }}:/var/www/oci_web_server/Caddyfile
+
+      - name: Reload Caddy Service
         run: |
-          rsync -avz ./Caddyfile ${{ secrets.OCI_USERNAME }}@${{ secrets.OCI_HOST }}:/etc/caddy/Caddyfile
           ssh ${{ secrets.OCI_USERNAME }}@${{ secrets.OCI_HOST }} "sudo systemctl reload caddy"
