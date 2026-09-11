@@ -1,16 +1,10 @@
-#!/usr/bin/env bash
-# dev.sh - Local synchronization and Caddy reload script
-
+#!/bin/bash
 set -e
 
-TARGET_DIR="/var/www/oci_web_server"
-
-echo "🔄 Syncing ./src/ to $TARGET_DIR..."
-mkdir -p "$TARGET_DIR"
-rsync -avz --delete ./src/ "$TARGET_DIR/"
-
-echo "🎨 Formatting local Caddyfile..."
+# Format configuration file
 caddy fmt --overwrite Caddyfile.local
 
-echo "🚀 Starting / Reloading Caddy..."
-caddy reload --config Caddyfile.local || caddy run --config Caddyfile.local
+# Reload or start Caddy using local config
+caddy reload --config Caddyfile.local 2>/dev/null || caddy start --config Caddyfile.local
+
+echo "Local server running at http://localhost:8080"
