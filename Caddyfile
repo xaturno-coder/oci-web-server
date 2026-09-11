@@ -1,0 +1,9 @@
+xaturno.mx {
+	root * /var/www/oci_web_server
+	file_server
+	encode zstd gzip
+
+	log {
+		output file /var/log/caddy/access.log
+	}
+}
