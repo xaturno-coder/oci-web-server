@@ -1,4 +1,4 @@
-# OCI Web Server (`xaturno.mx`)
+# xaturno.mx Project
 
 Decoupled static website repository hosted on Oracle Cloud Infrastructure (OCI) using Caddy Server, with local development managed in WSL and continuous deployment via GitHub Actions.
 
@@ -7,7 +7,6 @@ Decoupled static website repository hosted on Oracle Cloud Infrastructure (OCI) 
 ## 🏗️ Architecture & Overview
 
 * **Source Directory (`./src`):** All site assets (HTML, CSS, JS, images) are edited exclusively in `./src`.
-* **Local Web Root (`/var/www/oci_web_server`):** Local target directory served by Caddy on `http://localhost:8080`.
 * **Production Web Root (`/var/www/oci_web_server`):** Live OCI directory served by Caddy on `https://xaturno.mx`.
 * **Deployment:** Pushing to `main` triggers a GitHub Actions pipeline that syncs `./src` and `Caddyfile` to OCI over SSH and reloads Caddy.
 
@@ -36,64 +35,44 @@ Decoupled static website repository hosted on Oracle Cloud Infrastructure (OCI) 
 ## 🚀 Local Development Setup
 
 ### 1. Prerequisites
-Ensure `caddy` and `rsync` are installed in your local WSL environment:
+Ensure `caddy` and `git` are installed in your local WSL/Linux environment:
 
-```
-sudo dnf install -y rsync caddy   # Oracle Linux / RHEL
-# or: sudo apt install -y rsync caddy  # Ubuntu / Debian
-```
-
-### 2. Prepare Local Target Directory
-Run once to create the target local directory and set ownership to your user (no `sudo` required afterwards):
-
-```
-sudo mkdir -p /var/www/oci_web_server
-sudo chown -R $USER:$USER /var/www/oci_web_server
+```bash
+sudo dnf install -y caddy git  # Oracle Linux / RHEL
+# or: 
+sudo apt install -y caddy git  # Ubuntu / Debian
 ```
 
-### 3. Local Commands & Workflow
-To sync `./src/` to `/var/www/oci_web_server`, format `Caddyfile.local`, and start Caddy on port `8080`:
+### 2. Clone the Project
+Import the remote repository into your local development environment:
 
+```bash
+git clone git@github.com:xaturno-coder/oci-web-server.git
 ```
+
+### 3. Start the Web Server
+Navigate to the server directory, grant execution permissions to the setup script, and start the development server:
+
+```bash
+cd oci_web_server/
 chmod +x dev.sh
 ./dev.sh
 ```
 
 View your local site in browser: **`http://localhost:8080`**
 
-#### Automatic File Watcher (Optional)
-To automatically trigger `./dev.sh` every time a file inside `./src/` is saved:
-
-```
-find src | entr ./dev.sh
-```
-
 ---
 
-## 🌐 Production Configuration Files
+## 📜 Logging
 
-### `Caddyfile.local` (Local Desktop)
+### Local Environment (`Caddyfile.local`)
 
-http://localhost:8080 {
-    root * /var/www/oci_web_server
-    file_server
+* **Log Path:** `access.log`
 
-    log {
-        output file ./access.log
-    }
-}
+### Production Environment (`Caddyfile`)
 
-### `Caddyfile` (Production OCI)
+* **Log Path:** `/var/log/caddy/access.log`
 
-xaturno.mx {
-    root * /var/www/oci_web_server
-    file_server
-    encode zstd gzip
-
-    log {
-        output file /var/log/caddy/access.log
-    }
-}
 
 ---
 
