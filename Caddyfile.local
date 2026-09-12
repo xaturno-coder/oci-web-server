@@ -1,0 +1,8 @@
+http://localhost:8080 {
+	root * ./src
+	file_server
+
+	log {
+		output file ./access.log
+	}
+}
