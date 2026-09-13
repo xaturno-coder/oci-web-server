@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/**'
       - 'Caddyfile'
+      - '.github/workflows/**'
 
 jobs:
   deploy:
@@ -36,3 +37,17 @@ jobs:
       - name: Reload Caddy Service
         run: |
           ssh ${{ secrets.OCI_USERNAME }}@${{ secrets.OCI_HOST }} "sudo systemctl reload caddy"
+
+      - name: Configure Automated Stats Cron Job
+        run: |
+          ssh ${{ secrets.OCI_USERNAME }}@${{ secrets.OCI_HOST }} '
+            chmod +x /var/www/oci_web_server/update-stats.sh
+
+            CRON_JOB="* * * * * /var/www/oci_web_server/update-stats.sh > /dev/null 2>&1"
+
+            # Idempotently update user crontab without creating duplicates
+            (crontab -l 2>/dev/null | grep -Fv "update-stats.sh" || true; echo "$CRON_JOB") | crontab -
+
+            # Run once immediately so stats.json exists right away
+            /var/www/oci_web_server/update-stats.sh
+          '
