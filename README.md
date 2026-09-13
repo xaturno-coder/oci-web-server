@@ -19,10 +19,13 @@ Decoupled static website repository hosted on Oracle Cloud Infrastructure (OCI) 
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml          # GitHub Actions deployment pipeline
+├── scripts/
+│   └── post-deploy.sh          # Remote tasks executed on deployment (Caddy reload, stats cron)
 ├── src/                        # Primary web assets
 │   ├── index.html
 │   ├── css/
-│   └── js/
+│   ├── js/
+│   └── update-stats.sh         # System metrics generator
 ├── Caddyfile                   # Production Caddy configuration (OCI)
 ├── Caddyfile.local             # Unprivileged local Caddy configuration (Desktop)
 ├── dev.sh                      # Local sync & Caddy execution script
@@ -80,9 +83,9 @@ View your local site in browser: **`http://localhost:8080`**
 
 Deployment is fully automated through GitHub Actions on push to `main`:
 
-1. Syncs `./src/` to `/var/www/oci_web_server/` on the OCI instance.
+1. Syncs `./src/` to `/var/www/oci_web_server/` on the OCI instance (excluding dynamic `stats.json`).
 2. Transfers production `Caddyfile` to `/var/www/oci_web_server/Caddyfile`.
-3. Triggers `sudo systemctl reload caddy` over SSH.
+3. Executes `scripts/post-deploy.sh` over SSH to reload Caddy, maintain the stats cron job, and generate initial metrics.
 
 ### Execute Deployment
 ```
