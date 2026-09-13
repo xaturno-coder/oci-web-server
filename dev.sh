@@ -1,10 +1,15 @@
 #!/bin/bash
 set -e
 
-# Format configuration file
-caddy fmt --overwrite Caddyfile.local
+CONFIG_PATH="Caddyfile.local"
 
-# Reload or start Caddy using local config
-caddy reload --config Caddyfile.local 2>/dev/null || caddy start --config Caddyfile.local
+# 1. Format & Validate
+caddy fmt --overwrite "$CONFIG_PATH"
+caddy validate --config "$CONFIG_PATH" --adapter caddyfile
 
-echo "Local server running at http://localhost:8080"
+# 3. Run Caddy in background with your local config
+sudo -E caddy start --config "$CONFIG_PATH"
+
+echo "----------------------------------------------------"
+echo "  🚀 Local server running at http://localhost:8080  "                              "
+echo "----------------------------------------------------"

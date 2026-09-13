@@ -15,7 +15,7 @@ Decoupled static website repository hosted on Oracle Cloud Infrastructure (OCI) 
 ## 📁 Repository Structure
 
 ```text
-~/oci_web_server/
+~/oci-web-server/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml          # GitHub Actions deployment pipeline
